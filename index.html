@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Energia!</title>
+    <style>
+        :root {
+            --bg-color: #080a0f;
+            --panel-bg: #151821;
+            --wire-off: #252835;
+            --wire-on: #00f3ff;
+            --text-color: #e0e4f0;
+            --tile-bg: #1e222d;
+            --bulb-glass: #353a47;
+            --bulb-light: #e6ffff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* --- CONTROLE DE TELAS --- */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        /* --- TELA INICIAL --- */
+        #start-screen { background: radial-gradient(circle at center, #111522 0%, var(--bg-color) 100%); }
+        
+        .main-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin: 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--wire-on), 0 0 20px var(--wire-on);
+        }
+
+        /* Símbolo Minimalista (Nó de Energia) */
+        .logo-symbol {
+            position: relative;
+            width: 80px; height: 80px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-center {
+            width: 30px; height: 30px;
+            background: #fff; border-radius: 50%;
+            box-shadow: 0 0 20px #fff, 0 0 40px var(--wire-on);
+            animation: pulse-logo 2s infinite alternate;
+        }
+        .logo-wire {
+            position: absolute;
+            background: var(--wire-on);
+            box-shadow: 0 0 10px var(--wire-on);
+        }
+        .logo-wire.v { width: 4px; height: 100%; }
+        .logo-wire.h { width: 100%; height: 4px; }
+
+        @keyframes pulse-logo {
+            from { transform: scale(0.9); box-shadow: 0 0 15px #fff, 0 0 30px var(--wire-on); }
+            to { transform: scale(1.1); box-shadow: 0 0 25px #fff, 0 0 50px var(--wire-on); }
+        }
+
+        /* --- TELA DE INFORMAÇÃO --- */
+        .info-card {
+            background: var(--panel-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8), inset 0 0 2px var(--wire-on);
+        }
+        .info-card h2 { color: var(--wire-on); font-size: 24px; margin-top: 0; }
+        .info-card p { line-height: 1.6; color: #a5b0c9; font-size: 16px; margin-bottom: 30px; }
+
+        /* --- TELA DO JOGO --- */
+        #game-screen {
+            justify-content: flex-start;
+            padding-top: 3vh;
+        }
+
+        .game-container {
+            background: var(--panel-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .city-header {
+            position: relative; width: 100%; aspect-ratio: 16 / 9;
+            margin-bottom: 15px; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            background: #000; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+        }
+
+        .glow-border {
+            position: absolute; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 70%, var(--wire-on) 100%);
+            animation: spin 4s linear infinite;
+        }
+
+        .city-image {
+            position: absolute; inset: 3px; border-radius: 10px;
+            background-color: #111; background-size: cover; background-position: center; z-index: 2;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        #level-indicator { font-size: 13px; color: #7b86a3; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; }
+
+        #board {
+            display: grid; gap: 4px; background: #0d0f14; padding: 8px;
+            border-radius: 15px; margin-bottom: 15px; width: 100%; aspect-ratio: 1 / 1;
+            box-sizing: border-box;
+        }
+
+        .tile {
+            background: var(--tile-bg); border-radius: 8px; position: relative;
+            cursor: pointer; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            width: 100%; height: 100%; -webkit-tap-highlight-color: transparent;
+        }
+
+        .tile-inner { width: 100%; height: 100%; position: absolute; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .wire { position: absolute; background-color: var(--wire-off); transition: background-color 0.3s, box-shadow 0.3s; }
+        .wire-n { top: 0; left: 42%; width: 16%; height: 50%; border-radius: 0 0 4px 4px; }
+        .wire-e { top: 42%; right: 0; width: 50%; height: 16%; border-radius: 4px 0 0 4px; }
+        .wire-s { bottom: 0; left: 42%; width: 16%; height: 50%; border-radius: 4px 4px 0 0; }
+        .wire-w { top: 42%; left: 0; width: 50%; height: 16%; border-radius: 0 4px 4px 0; }
+        
+        .center-hub { position: absolute; top: 35%; left: 35%; width: 30%; height: 30%; background-color: var(--wire-off); border-radius: 50%; transition: all 0.3s; }
+
+        .bulb-icon {
+            position: absolute; top: 20%; left: 20%; width: 60%; height: 60%;
+            border-radius: 50%; z-index: 2; background: radial-gradient(circle at 30% 30%, #555, var(--bulb-glass));
+            border: 2px solid #222; box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6); transition: all 0.4s ease;
+        }
+        .bulb-icon::after {
+            content: ''; position: absolute; bottom: -20%; left: 35%; width: 30%; height: 25%;
+            background: linear-gradient(to bottom, #444, #222); border-radius: 0 0 4px 4px;
+        }
+
+        .source-icon {
+            position: absolute; top: 30%; left: 30%; width: 40%; height: 40%; background-color: #fff;
+            border-radius: 8px; z-index: 3; box-shadow: 0 0 15px #fff, 0 0 30px var(--wire-on);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.95); box-shadow: 0 0 10px #fff, 0 0 20px var(--wire-on); }
+            to { transform: scale(1.05); box-shadow: 0 0 20px #fff, 0 0 40px var(--wire-on); }
+        }
+
+        .powered .wire, .powered .center-hub { background-color: var(--wire-on); box-shadow: 0 0 12px var(--wire-on); }
+        .powered .bulb-icon { background: radial-gradient(circle at 35% 35%, #fff, var(--bulb-light) 40%, var(--wire-on) 90%); border: 2px solid var(--wire-on); box-shadow: 0 0 25px var(--wire-on), inset 0 0 15px #fff; }
+
+        #message-area { height: 50px; display: flex; align-items: center; justify-content: center; width: 100%; }
+
+        .btn {
+            background: linear-gradient(135deg, var(--wire-on), #0088ff); color: #000; border: none;
+            padding: 15px 40px; border-radius: 30px; font-weight: 900; font-size: 18px;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s; text-transform: uppercase;
+        }
+        .btn:active { transform: scale(0.95); }
+        
+        #next-btn { display: none; padding: 12px 30px; font-size: 16px; }
+
+        .dev-footer {
+            position: absolute; bottom: 20px;
+            font-size: 12px; color: #555; letter-spacing: 1px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Áudio de Fundo -->
+    <audio id="bg-music" src="assets/music/lofi.mp3" loop></audio>
+
+    <!-- TELA 1: INICIAL -->
+    <div id="start-screen" class="screen active">
+        <div class="logo-symbol">
+            <div class="logo-wire v"></div>
+            <div class="logo-wire h"></div>
+            <div class="logo-center"></div>
+        </div>
+        <h1 class="main-title">Energia!</h1>
+        <button class="btn" onclick="showInfoScreen()">Iniciar</button>
+        <div class="dev-footer">Dev Wagner Moreira</div>
+    </div>
+
+    <!-- TELA 2: INFORMAÇÕES (TUTORIAL / REPLAY FACTOR) -->
+    <div id="info-screen" class="screen hidden">
+        <div class="info-card">
+            <h2>Geração Procedural</h2>
+            <p><strong>Cada partida é única.</strong><br><br>O algoritmo do jogo constrói os labirintos de fios do zero toda vez que você joga. Volte sempre para um desafio infinito e nunca igual ao anterior!</p>
+            <button class="btn" onclick="startGame()">Jogar</button>
+        </div>
+    </div>
+
+    <!-- TELA 3: JOGO -->
+    <div id="game-screen" class="screen hidden">
+        <div class="game-container">
+            <div class="city-header">
+                <div class="glow-border"></div>
+                <div class="city-image" id="city-bg" style="background-image: url('assets/img/cidade01.png');"></div>
+            </div>
+            <h1 style="margin:0 0 5px 0; font-size: 22px;">Energia!</h1>
+            <div id="level-indicator">Fase 1 / 24</div>
+            <div id="board"></div>
+            <div id="message-area">
+                <button class="btn" id="next-btn" onclick="nextLevel()">Próxima Fase</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- NAVEGAÇÃO DE TELAS E ÁUDIO ---
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.4; // Volume agradável para background
+
+        function switchScreen(hideId, showId) {
+            document.getElementById(hideId).classList.remove('active');
+            document.getElementById(hideId).classList.add('hidden');
+            document.getElementById(showId).classList.remove('hidden');
+            document.getElementById(showId).classList.add('active');
+        }
+
+        function showInfoScreen() {
+            // Tenta tocar a música assim que houver a primeira interação (Play policy)
+            bgMusic.play().catch(e => console.log("Aguardando interação completa para tocar áudio."));
+            initAudio(); // Inicia o contexto de áudio dos SFX
+            switchScreen('start-screen', 'info-screen');
+        }
+
+        function startGame() {
+            currentLevel = 1;
+            switchScreen('info-screen', 'game-screen');
+            loadLevel();
+        }
+
+        // --- SISTEMA DE ÁUDIO SINTÉTICO (SFX) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (!audioInitialized) { audioCtx = new AudioContext(); audioInitialized = true; }
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        }
+
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const sounds = {
+            rotate: () => playTone(400, 'sine', 0.1, 0.03),
+            connect: () => playTone(600, 'triangle', 0.2, 0.05),
+            bulbLit: () => playTone(880, 'sine', 0.4, 0.08),
+            win: () => {
+                setTimeout(() => playTone(523.25, 'sine', 0.3, 0.1), 0);
+                setTimeout(() => playTone(659.25, 'sine', 0.3, 0.1), 100);
+                setTimeout(() => playTone(783.99, 'sine', 0.3, 0.1), 200);
+                setTimeout(() => playTone(1046.50, 'triangle', 0.6, 0.15), 300);
+            }
+        };
+
+        // --- LÓGICA DO JOGO PROCEDURAL ---
+        const MAX_LEVELS = 24;
+        let currentLevel = 1;
+        
+        const tileTypes = {
+            'corner': [1, 1, 0, 0], 't-shape': [1, 1, 1, 0],
+            'line': [1, 0, 1, 0], 'bulb': [1, 0, 0, 0], 'cross': [1, 1, 1, 1]
+        };
+
+        const boardEl = document.getElementById('board');
+        let tiles = [];
+        let gridSize = 2;
+
+        function generatePuzzle(size) {
+            let cells = Array.from({length: size * size}, () => ({n:0, e:0, s:0, w:0, visited:false}));
+            let startIdx = Math.floor(Math.random() * cells.length);
+            cells[startIdx].visited = true;
+            let active = [startIdx];
+
+            while(active.length > 0) {
+                let activeIdx = Math.floor(Math.random() * active.length);
+                let curr = active[activeIdx];
+                let x = curr % size, y = Math.floor(curr / size);
+                let neighbors = [];
+
+                if(y > 0 && !cells[curr - size].visited) neighbors.push({idx: curr - size, dir: 'n', opp: 's'});
+                if(x < size - 1 && !cells[curr + 1].visited) neighbors.push({idx: curr + 1, dir: 'e', opp: 'w'});
+                if(y < size - 1 && !cells[curr + size].visited) neighbors.push({idx: curr + size, dir: 's', opp: 'n'});
+                if(x > 0 && !cells[curr - 1].visited) neighbors.push({idx: curr - 1, dir: 'w', opp: 'e'});
+
+                if(neighbors.length === 0) {
+                    active.splice(activeIdx, 1);
+                } else {
+                    let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    cells[curr][next.dir] = 1; cells[next.idx][next.opp] = 1;
+                    cells[next.idx].visited = true; active.push(next.idx);
+                }
+            }
+
+            return cells.map((c, i) => {
+                let sum = c.n + c.e + c.s + c.w;
+                let type = ''; let rot = 0;
+                if (sum === 1) { type = 'bulb'; if(c.n) rot=0; else if(c.e) rot=1; else if(c.s) rot=2; else if(c.w) rot=3; }
+                else if (sum === 2) {
+                    if ((c.n && c.s) || (c.e && c.w)) { type = 'line'; rot = c.n ? 0 : 1; }
+                    else { type = 'corner'; if(c.n && c.e) rot=0; else if(c.e && c.s) rot=1; else if(c.s && c.w) rot=2; else if(c.w && c.n) rot=3; }
+                }
+                else if (sum === 3) { type = 't-shape'; if(!c.w) rot=0; else if(!c.n) rot=1; else if(!c.e) rot=2; else if(!c.s) rot=3; }
+                else { type = 'cross'; }
+                return { type: type, correctRot: rot, isSource: (i === startIdx) };
+            });
+        }
+
+        function loadLevel() {
+            if (currentLevel <= 3) gridSize = 2;
+            else if (currentLevel <= 8) gridSize = 3;
+            else if (currentLevel <= 15) gridSize = 4;
+            else gridSize = 5;
+
+            boardEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            boardEl.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            boardEl.innerHTML = '';
+
+            let levelData = generatePuzzle(gridSize);
+            
+            tiles = levelData.map(t => {
+                let randomRot = Math.floor(Math.random() * 4);
+                return { ...t, rot: randomRot, powered: false };
+            });
+            
+            tiles.forEach((tile, index) => {
+                const tileEl = document.createElement('div');
+                tileEl.className = 'tile';
+                tileEl.onclick = () => rotateTile(index);
+
+                const innerEl = document.createElement('div');
+                innerEl.className = 'tile-inner';
+                innerEl.id = `inner-${index}`;
+                innerEl.style.transform = `rotate(${tile.rot * 90}deg)`;
+
+                const base = tileTypes[tile.type];
+                if (base[0]) innerEl.innerHTML += '<div class="wire wire-n"></div>';
+                if (base[1]) innerEl.innerHTML += '<div class="wire wire-e"></div>';
+                if (base[2]) innerEl.innerHTML += '<div class="wire wire-s"></div>';
+                if (base[3]) innerEl.innerHTML += '<div class="wire wire-w"></div>';
+
+                if (tile.type !== 'bulb' && tile.type !== 'cross') innerEl.innerHTML += '<div class="center-hub"></div>';
+                if (tile.type === 'bulb') innerEl.innerHTML += '<div class="bulb-icon"></div>';
+                if (tile.isSource) innerEl.innerHTML += '<div class="source-icon"></div>';
+
+                tileEl.appendChild(innerEl); boardEl.appendChild(tileEl);
+            });
+
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('level-indicator').innerText = `Fase ${currentLevel} / ${MAX_LEVELS}`;
+            
+            updateCityImage();
+            updatePower(true); 
+        }
+
+        function updateCityImage() {
+            let imageNum = Math.floor((currentLevel - 1) / 2) + 1;
+            if (imageNum > 12) imageNum = 12;
+            let imageStr = imageNum < 10 ? '0' + imageNum : imageNum;
+            document.getElementById('city-bg').style.backgroundImage = `url('assets/img/cidade${imageStr}.png')`;
+        }
+
+        function rotateTile(index) {
+            sounds.rotate(); 
+            tiles[index].rot = (tiles[index].rot + 1) % 4;
+            document.getElementById(`inner-${index}`).style.transform = `rotate(${tiles[index].rot * 90}deg)`;
+            updatePower(false);
+        }
+
+        function getActiveConnections(tile) {
+            const base = tileTypes[tile.type];
+            let active = [0, 0, 0, 0];
+            for (let i = 0; i < 4; i++) active[(i + tile.rot) % 4] = base[i];
+            return active;
+        }
+
+        function updatePower(isInit = false) {
+            let oldPowerStates = tiles.map(t => t.powered);
+            tiles.forEach(t => t.powered = false);
+
+            let sourceIdx = tiles.findIndex(t => t.isSource);
+            if(sourceIdx === -1) return;
+
+            let queue = [sourceIdx];
+            tiles[sourceIdx].powered = true;
+
+            while(queue.length > 0) {
+                let currIdx = queue.shift();
+                let currConns = getActiveConnections(tiles[currIdx]);
+                let neighbors = [
+                    { idx: currIdx - gridSize, dir: 0, oppDir: 2 },
+                    { idx: currIdx + 1, dir: 1, oppDir: 3 },
+                    { idx: currIdx + gridSize, dir: 2, oppDir: 0 },
+                    { idx: currIdx - 1, dir: 3, oppDir: 1 }
+                ];
+
+                neighbors.forEach(n => {
+                    if (n.idx < 0 || n.idx >= tiles.length) return;
+                    if (n.dir === 1 && currIdx % gridSize === gridSize - 1) return; 
+                    if (n.dir === 3 && currIdx % gridSize === 0) return; 
+
+                    let neighborTile = tiles[n.idx];
+                    if (!neighborTile.powered) {
+                        let neighborConns = getActiveConnections(neighborTile);
+                        if (currConns[n.dir] === 1 && neighborConns[n.oppDir] === 1) {
+                            neighborTile.powered = true;
+                            queue.push(n.idx);
+                        }
+                    }
+                });
+            }
+
+            if (!isInit) {
+                let newConnections = 0; let newBulbs = 0;
+                tiles.forEach((t, i) => {
+                    if (t.powered && !oldPowerStates[i]) {
+                        if (t.type === 'bulb') newBulbs++; else newConnections++;
+                    }
+                });
+                if (newBulbs > 0) sounds.bulbLit(); else if (newConnections > 0) sounds.connect();
+            }
+
+            renderPower(); checkWin();
+        }
+
+        function renderPower() {
+            const domTiles = document.querySelectorAll('.tile');
+            tiles.forEach((tile, index) => {
+                if (tile.powered) domTiles[index].classList.add('powered');
+                else domTiles[index].classList.remove('powered');
+            });
+        }
+
+        function checkWin() {
+            const allTilesPowered = tiles.every(t => t.powered);
+            if (allTilesPowered) {
+                const domTiles = document.querySelectorAll('.tile');
+                domTiles.forEach(t => t.onclick = null); 
+                
+                setTimeout(() => {
+                    sounds.win();
+                    if (currentLevel < MAX_LEVELS) {
+                        document.getElementById('next-btn').style.display = 'block';
+                    } else {
+                        document.getElementById('level-indicator').innerText = "Cidade Totalmente Iluminada! 🎉";
+                        document.getElementById('level-indicator').style.color = "var(--wire-on)";
+                    }
+                }, 400); 
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            loadLevel();
+        }
+    </script>
+</body>
+</html>
