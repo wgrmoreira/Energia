@@ -40,47 +40,28 @@
             box-sizing: border-box;
             padding: 20px;
         }
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-            z-index: -1;
-        }
-        .active {
-            opacity: 1;
-            pointer-events: all;
-            z-index: 10;
-        }
+        .hidden { opacity: 0; pointer-events: none; z-index: -1; }
+        .active { opacity: 1; pointer-events: all; z-index: 10; }
 
         /* --- TELA INICIAL --- */
         #start-screen { background: radial-gradient(circle at center, #111522 0%, var(--bg-color) 100%); }
         
         .main-title {
-            font-size: 48px;
-            font-weight: 900;
-            margin: 30px 0;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
+            font-size: 48px; font-weight: 900; margin: 30px 0;
+            text-transform: uppercase; letter-spacing: 4px; color: #fff;
             text-shadow: 0 0 10px var(--wire-on), 0 0 20px var(--wire-on);
         }
 
-        /* Símbolo Minimalista (Nó de Energia) */
         .logo-symbol {
-            position: relative;
-            width: 80px; height: 80px;
+            position: relative; width: 80px; height: 80px;
             display: flex; align-items: center; justify-content: center;
         }
         .logo-center {
-            width: 30px; height: 30px;
-            background: #fff; border-radius: 50%;
+            width: 30px; height: 30px; background: #fff; border-radius: 50%;
             box-shadow: 0 0 20px #fff, 0 0 40px var(--wire-on);
             animation: pulse-logo 2s infinite alternate;
         }
-        .logo-wire {
-            position: absolute;
-            background: var(--wire-on);
-            box-shadow: 0 0 10px var(--wire-on);
-        }
+        .logo-wire { position: absolute; background: var(--wire-on); box-shadow: 0 0 10px var(--wire-on); }
         .logo-wire.v { width: 4px; height: 100%; }
         .logo-wire.h { width: 100%; height: 4px; }
 
@@ -89,36 +70,46 @@
             to { transform: scale(1.1); box-shadow: 0 0 25px #fff, 0 0 50px var(--wire-on); }
         }
 
-        /* --- TELA DE INFORMAÇÃO --- */
+        /* --- CARDS DE INFORMAÇÃO --- */
         .info-card {
-            background: var(--panel-bg);
-            padding: 40px 30px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
+            background: var(--panel-bg); padding: 40px 30px; border-radius: 20px;
+            text-align: center; max-width: 400px; width: 100%;
             box-shadow: 0 15px 50px rgba(0,0,0,0.8), inset 0 0 2px var(--wire-on);
+            display: flex; flex-direction: column; align-items: center;
         }
         .info-card h2 { color: var(--wire-on); font-size: 24px; margin-top: 0; }
         .info-card p { line-height: 1.6; color: #a5b0c9; font-size: 16px; margin-bottom: 30px; }
 
         /* --- TELA DO JOGO --- */
-        #game-screen {
-            justify-content: flex-start;
-            padding-top: 3vh;
-        }
+        #game-screen { justify-content: flex-start; padding-top: 3vh; }
 
         .game-container {
-            background: var(--panel-bg);
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-            border-radius: 20px;
+            position: relative;
+            background: var(--panel-bg); width: 100%; max-width: 450px;
+            padding: 20px; border-radius: 20px;
             box-shadow: 0 15px 50px rgba(0,0,0,0.8);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center; display: flex; flex-direction: column;
+            align-items: center; box-sizing: border-box;
+        }
+
+        /* OVERLAYS (Instrução Inicial e Frases Inspiradoras) */
+        .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(13, 15, 20, 0.95);
+            border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease; text-align: center; padding: 30px;
             box-sizing: border-box;
+        }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        
+        #instruction-overlay h2 { color: #fff; font-size: 24px; margin-bottom: 10px; text-shadow: 0 0 15px var(--wire-on); }
+        #instruction-overlay p { color: var(--wire-on); font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        #inspiration-overlay p {
+            color: #fff; font-size: 22px; font-weight: 300; font-style: italic; 
+            line-height: 1.5; text-shadow: 0 0 12px rgba(0, 243, 255, 0.6);
         }
 
         .city-header {
@@ -142,7 +133,16 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #level-indicator { font-size: 13px; color: #7b86a3; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; }
+        /* STATUS ROW: Fase e Contador Contínuo */
+        .status-row {
+            display: flex; justify-content: space-between; width: 100%;
+            padding: 0 5px; box-sizing: border-box; margin-bottom: 15px;
+        }
+        #level-indicator, #bulb-counter {
+            font-size: 12px; color: #7b86a3; text-transform: uppercase;
+            font-weight: bold; letter-spacing: 1.5px; transition: color 0.3s;
+        }
+        #bulb-counter { color: var(--wire-on); text-shadow: 0 0 5px rgba(0, 243, 255, 0.4); }
 
         #board {
             display: grid; gap: 4px; background: #0d0f14; padding: 8px;
@@ -210,10 +210,8 @@
 </head>
 <body>
 
-    <!-- Áudio de Fundo -->
     <audio id="bg-music" src="assets/music/lofi.mp3" loop></audio>
 
-    <!-- TELA 1: INICIAL -->
     <div id="start-screen" class="screen active">
         <div class="logo-symbol">
             <div class="logo-wire v"></div>
@@ -225,7 +223,6 @@
         <div class="dev-footer">Dev Wagner Moreira</div>
     </div>
 
-    <!-- TELA 2: INFORMAÇÕES (TUTORIAL / REPLAY FACTOR) -->
     <div id="info-screen" class="screen hidden">
         <div class="info-card">
             <h2>Geração Procedural</h2>
@@ -234,26 +231,80 @@
         </div>
     </div>
 
-    <!-- TELA 3: JOGO -->
     <div id="game-screen" class="screen hidden">
         <div class="game-container">
+            
+            <div id="instruction-overlay" class="overlay">
+                <h2>Acenda Todas as Lâmpadas</h2>
+                <p>Faça a Energia Voltar à Cidade</p>
+            </div>
+
+            <div id="inspiration-overlay" class="overlay">
+                <p id="inspiration-text">Sua energia transforma o ambiente.</p>
+            </div>
+
             <div class="city-header">
                 <div class="glow-border"></div>
                 <div class="city-image" id="city-bg" style="background-image: url('assets/img/cidade01.png');"></div>
             </div>
+            
             <h1 style="margin:0 0 5px 0; font-size: 22px;">Energia!</h1>
-            <div id="level-indicator">Fase 1 / 24</div>
+            
+            <div class="status-row">
+                <div id="level-indicator">Fase 1 / 24</div>
+                <div id="bulb-counter">Luzes: 0</div>
+            </div>
+
             <div id="board"></div>
+            
             <div id="message-area">
-                <button class="btn" id="next-btn" onclick="nextLevel()">Próxima Fase</button>
+                <button class="btn" id="next-btn" onclick="handleNextLevel()">Próxima Fase</button>
             </div>
         </div>
     </div>
 
+    <div id="end-screen" class="screen hidden">
+        <div class="info-card" style="max-width: 450px;">
+            <h1 class="main-title" style="font-size: 36px; margin: 0 0 10px 0;">Parabéns!</h1>
+            <p style="color: #fff; font-size: 18px; margin-bottom: 20px;">Você iluminou toda a cidade!</p>
+            
+            <div class="city-header" style="margin-bottom: 30px; box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);">
+                <div class="glow-border"></div>
+                <div class="city-image" style="background-image: url('assets/img/cidade13.png');"></div>
+            </div>
+
+            <button class="btn" onclick="resetToStart()">Voltar ao Início</button>
+        </div>
+    </div>
+
     <script>
+        // --- 20 FRASES INSPIRADORAS ---
+        const inspiracoes = [
+            "Tenha calma.",
+            "Lembre-se de respirar.",
+            "Você inspira pessoas.",
+            "Alguém sorri ao lembrar de você.",
+            "Cada pequeno passo importa.",
+            "Sua luz ilumina o mundo.",
+            "Tudo acontece no tempo certo.",
+            "Acredite na sua força interior.",
+            "Dias melhores sempre chegam.",
+            "Sua jornada é única e especial.",
+            "Respire fundo e continue.",
+            "Você é mais forte do que imagina.",
+            "O sucesso é feito de pequenas vitórias.",
+            "Nunca deixe de brilhar.",
+            "A paz começa de dentro para fora.",
+            "Cultive pensamentos positivos.",
+            "O universo conspira a seu favor.",
+            "Você merece todo o amor do mundo.",
+            "Sua energia transforma o ambiente.",
+            "Celebre cada conquista sua."
+        ];
+
         // --- NAVEGAÇÃO DE TELAS E ÁUDIO ---
         const bgMusic = document.getElementById('bg-music');
-        bgMusic.volume = 0.4; // Volume agradável para background
+        bgMusic.volume = 0.4; 
 
         function switchScreen(hideId, showId) {
             document.getElementById(hideId).classList.remove('active');
@@ -263,22 +314,29 @@
         }
 
         function showInfoScreen() {
-            // Tenta tocar a música assim que houver a primeira interação (Play policy)
-            bgMusic.play().catch(e => console.log("Aguardando interação completa para tocar áudio."));
-            initAudio(); // Inicia o contexto de áudio dos SFX
+            bgMusic.play().catch(e => console.log("Aguardando interação."));
+            initAudio(); 
             switchScreen('start-screen', 'info-screen');
         }
 
         function startGame() {
             currentLevel = 1;
+            globalLitBulbs = 0; // Reseta o contador global ao iniciar nova partida
             switchScreen('info-screen', 'game-screen');
             loadLevel();
+
+            const overlay = document.getElementById('instruction-overlay');
+            overlay.classList.add('active');
+            setTimeout(() => { overlay.classList.remove('active'); }, 4000);
+        }
+
+        function resetToStart() {
+            switchScreen('end-screen', 'start-screen');
         }
 
         // --- SISTEMA DE ÁUDIO SINTÉTICO (SFX) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx;
-        let audioInitialized = false;
+        let audioCtx; let audioInitialized = false;
 
         function initAudio() {
             if (!audioInitialized) { audioCtx = new AudioContext(); audioInitialized = true; }
@@ -287,8 +345,7 @@
 
         function playTone(freq, type, duration, vol = 0.1) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
@@ -305,12 +362,20 @@
                 setTimeout(() => playTone(659.25, 'sine', 0.3, 0.1), 100);
                 setTimeout(() => playTone(783.99, 'sine', 0.3, 0.1), 200);
                 setTimeout(() => playTone(1046.50, 'triangle', 0.6, 0.15), 300);
+            },
+            endGame: () => {
+                setTimeout(() => playTone(523.25, 'triangle', 0.4, 0.15), 0);
+                setTimeout(() => playTone(659.25, 'triangle', 0.4, 0.15), 200);
+                setTimeout(() => playTone(783.99, 'triangle', 0.4, 0.15), 400);
+                setTimeout(() => playTone(1046.50, 'triangle', 0.8, 0.2), 600);
             }
         };
 
         // --- LÓGICA DO JOGO PROCEDURAL ---
         const MAX_LEVELS = 24;
         let currentLevel = 1;
+        let globalLitBulbs = 0; // Acumula luzes acesas nas fases anteriores
+        let totalBulbsInLevel = 0;
         
         const tileTypes = {
             'corner': [1, 1, 0, 0], 't-shape': [1, 1, 1, 0],
@@ -324,8 +389,7 @@
         function generatePuzzle(size) {
             let cells = Array.from({length: size * size}, () => ({n:0, e:0, s:0, w:0, visited:false}));
             let startIdx = Math.floor(Math.random() * cells.length);
-            cells[startIdx].visited = true;
-            let active = [startIdx];
+            cells[startIdx].visited = true; let active = [startIdx];
 
             while(active.length > 0) {
                 let activeIdx = Math.floor(Math.random() * active.length);
@@ -377,6 +441,8 @@
                 let randomRot = Math.floor(Math.random() * 4);
                 return { ...t, rot: randomRot, powered: false };
             });
+
+            totalBulbsInLevel = tiles.filter(t => t.type === 'bulb').length;
             
             tiles.forEach((tile, index) => {
                 const tileEl = document.createElement('div');
@@ -465,6 +531,11 @@
                 });
             }
 
+            // Atualiza o contador de lâmpadas Contínuo
+            let litBulbsThisLevel = tiles.filter(t => t.type === 'bulb' && t.powered).length;
+            const totalDisplayed = globalLitBulbs + litBulbsThisLevel;
+            document.getElementById('bulb-counter').innerText = `Luzes: ${totalDisplayed}`;
+
             if (!isInit) {
                 let newConnections = 0; let newBulbs = 0;
                 tiles.forEach((t, i) => {
@@ -493,20 +564,41 @@
                 domTiles.forEach(t => t.onclick = null); 
                 
                 setTimeout(() => {
-                    sounds.win();
                     if (currentLevel < MAX_LEVELS) {
+                        sounds.win();
                         document.getElementById('next-btn').style.display = 'block';
                     } else {
-                        document.getElementById('level-indicator').innerText = "Cidade Totalmente Iluminada! 🎉";
-                        document.getElementById('level-indicator').style.color = "var(--wire-on)";
+                        // Fim do Jogo
+                        sounds.endGame();
+                        setTimeout(() => {
+                            switchScreen('game-screen', 'end-screen');
+                        }, 1000);
                     }
                 }, 400); 
             }
         }
 
-        function nextLevel() {
-            currentLevel++;
-            loadLevel();
+        function handleNextLevel() {
+            // Guarda as luzes dessa fase no montante global antes de pular de fase
+            globalLitBulbs += totalBulbsInLevel; 
+
+            // Se for fase par, mostra mensagem inspiradora
+            if (currentLevel % 2 === 0) {
+                const overlay = document.getElementById('inspiration-overlay');
+                const randomText = inspiracoes[Math.floor(Math.random() * inspiracoes.length)];
+                document.getElementById('inspiration-text').innerText = randomText;
+                
+                overlay.classList.add('active');
+                
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    currentLevel++;
+                    loadLevel();
+                }, 3500); // Exibe a frase por 3,5 segundos
+            } else {
+                currentLevel++;
+                loadLevel();
+            }
         }
     </script>
 </body>
