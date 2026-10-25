@@ -1,0 +1,55 @@
+ENERGIA — UMA CIDADE, UM RECOMEÇO
+Remasterização do jogo de Wagner Moreira
+
+COMO JOGAR
+1. Extraia todo o ZIP para uma pasta.
+2. Abra index.html no Chrome, Edge ou Firefox.
+3. Clique em “Acender a primeira luz”. A música começa após essa interação.
+O jogo funciona sem internet; não precisa de instalação nem de servidor.
+
+Gire as peças para ligar TODA a rede à fonte (ϟ), acender as lâmpadas e fechar todas as pontas soltas.
+São 24 fases, em quatro capítulos. As grades crescem de 3×3 até 6×6.
+A cidade recebe novas luzes a cada fase concluída e amanhece no último capítulo.
+
+CONTROLES
+Clique/toque ou Enter/Espaço: girar 90° para a direita.
+Shift + Enter: girar para a esquerda.
+Setas: navegar entre as peças.
+Desfazer: volta uma ação; o contador mantém o total de giros realizados.
+Uma pista: orienta uma peça corretamente; conta como uma ação.
+Recomeçar: restaura o mesmo tabuleiro; pistas usadas permanecem registradas.
+Peças com ▣ são fixas e já estão corretas.
+
+SEU RITMO
+Não há cronômetro, perda de vidas nem limite de movimentos.
+A meta suave é uma referência aproximada, não uma solução mínima certificada.
+Há três pistas por fase. O modo contemplativo oferece pistas ilimitadas e esconde a meta.
+Após a vitória, você pode ficar observando a cidade antes de avançar.
+
+PROGRESSO E SOM
+O jogo salva a fase e as posições das peças no armazenamento local do navegador.
+O salvamento depende das permissões do navegador; em navegação privada ou ao abrir por arquivo,
+o comportamento pode variar. Use o mesmo navegador e a mesma pasta para continuar.
+O botão ♫ liga/pausa a trilha original (assets/music/lofi.mp3).
+O áudio original foi preservado sem alteração.
+O progresso da edição original não é sobrescrito nem importado.
+
+ARQUIVOS PARA EDITAR
+index.html: estrutura e textos da interface.
+style.css: visual, cores, animações e responsividade.
+engine.js: geração procedural e regras dos circuitos.
+app.js: fases, mensagens, controles, áudio e salvamento.
+city.js: ilustração vetorial e iluminação progressiva.
+assets/cidade/: 25 imagens SVG exportadas, do estado 00 ao 24.
+assets/music/lofi.mp3: trilha do jogo original.
+Sem bibliotecas externas, anúncios ou recursos remotos.
+
+VISUAL E ACESSIBILIDADE
+Cidade original em SVG: edifícios, torre do relógio, bonde, ponte, rio e reflexos.
+Suporte a mouse, toque e teclado; foco visível e redução de animação conforme a preferência do sistema.
+Mensagens de acolhimento entre fases, sem pressão para continuar.
+
+VALIDAÇÃO
+2.400 circuitos gerados (100 por fase) passaram por verificações de solução, conectividade,
+vazamentos, peças fixas e rotação. A música foi comparada por SHA-256 com o original.
+
